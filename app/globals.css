@@ -19,6 +19,16 @@
   --border: #2e2e2e;
   --accent: #818cf8;
 }
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not(.dark) {
+    --bg: #0a0a0a;
+    --fg: #fafafa;
+    --muted: #a3a3a3;
+    --card: #171717;
+    --border: #2e2e2e;
+    --accent: #818cf8;
+  }
+}
 
 @theme inline {
   --color-bg: var(--bg);

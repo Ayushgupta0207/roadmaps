@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { ReactFlow, Background, Controls, type Node, type Edge } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import ResourceCard, { type ResourceItem } from "./ResourceCard";
+import DoneButton from "./DoneButton";
 
 type TopicNode = {
   id: string;
@@ -15,26 +16,42 @@ type TopicNode = {
   resources: ResourceItem[];
 };
 
-export default function RoadmapGraph({ nodes }: { nodes: TopicNode[] }) {
+type Props = {
+  nodes: TopicNode[];
+  slug: string;
+  doneIds: string[];
+  signedIn: boolean;
+};
+
+export default function RoadmapGraph({ nodes, slug, doneIds, signedIn }: Props) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const active = nodes.find((n) => n.id === activeId) ?? null;
+  const doneSet = useMemo(() => new Set(doneIds), [doneIds]);
 
   const flowNodes: Node[] = useMemo(
     () =>
-      nodes.map((n) => ({
-        id: n.id,
-        position: { x: n.posX, y: n.posY },
-        data: { label: n.title },
-        style: {
-          padding: "10px 16px",
-          borderRadius: 10,
-          fontWeight: 600,
-          fontSize: 14,
-          cursor: "pointer",
-          border: n.id === activeId ? "2px solid var(--accent)" : undefined,
-        },
-      })),
-    [nodes, activeId]
+      nodes.map((n) => {
+        const done = doneSet.has(n.id);
+        const isActive = n.id === activeId;
+        return {
+          id: n.id,
+          position: { x: n.posX, y: n.posY },
+          data: { label: done ? `✓ ${n.title}` : n.title },
+          style: {
+            padding: "10px 16px",
+            borderRadius: 10,
+            fontWeight: 600,
+            fontSize: 14,
+            cursor: "pointer",
+            border: isActive
+              ? "2px solid var(--accent)"
+              : done
+              ? "2px solid #22c55e"
+              : undefined,
+          },
+        };
+      }),
+    [nodes, activeId, doneSet]
   );
 
   const flowEdges: Edge[] = useMemo(
@@ -46,9 +63,21 @@ export default function RoadmapGraph({ nodes }: { nodes: TopicNode[] }) {
   );
 
   const ordered = useMemo(() => [...nodes].sort((a, b) => a.posY - b.posY), [nodes]);
+  const percent = nodes.length ? Math.round((doneIds.length / nodes.length) * 100) : 0;
 
   return (
     <>
+      {signedIn && (
+        <div className="mb-4">
+          <div className="mb-1 text-sm text-muted">
+            {doneIds.length} of {nodes.length} topics completed ({percent}%)
+          </div>
+          <div className="h-2 overflow-hidden rounded bg-card">
+            <div className="h-full bg-accent" style={{ width: `${percent}%` }} />
+          </div>
+        </div>
+      )}
+
       {/* Desktop: graph + side panel */}
       <div className="hidden gap-4 md:grid md:grid-cols-[1fr_360px]">
         <div className="h-[70vh] w-full min-w-0 rounded-xl border border-border">
@@ -70,6 +99,12 @@ export default function RoadmapGraph({ nodes }: { nodes: TopicNode[] }) {
             <>
               <h2 className="text-xl font-semibold">{active.title}</h2>
               <p className="mb-4 text-sm text-muted">{active.summary}</p>
+              <DoneButton
+                nodeId={active.id}
+                slug={slug}
+                done={doneSet.has(active.id)}
+                signedIn={signedIn}
+              />
               <ul className="space-y-3">
                 {active.resources.map((r) => (
                   <ResourceCard key={r.id} r={r} />
@@ -91,9 +126,15 @@ export default function RoadmapGraph({ nodes }: { nodes: TopicNode[] }) {
           <li key={n.id}>
             <details className="rounded-xl border border-border bg-card p-4">
               <summary className="cursor-pointer font-semibold">
-                {i + 1}. {n.title}
+                {i + 1}. {n.title} {doneSet.has(n.id) && "✓"}
               </summary>
               <p className="mb-3 mt-2 text-sm text-muted">{n.summary}</p>
+              <DoneButton
+                nodeId={n.id}
+                slug={slug}
+                done={doneSet.has(n.id)}
+                signedIn={signedIn}
+              />
               <ul className="space-y-3">
                 {n.resources.map((r) => (
                   <ResourceCard key={r.id} r={r} />

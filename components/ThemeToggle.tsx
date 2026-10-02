@@ -6,16 +6,21 @@ export default function ThemeToggle() {
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
-    setDark(document.documentElement.classList.contains("dark"));
+    const root = document.documentElement;
+    setDark(
+      root.classList.contains("dark") ||
+        (!root.classList.contains("light") &&
+          matchMedia("(prefers-color-scheme: dark)").matches)
+    );
   }, []);
 
   function toggle() {
     const next = !dark;
     setDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    try {
-      localStorage.setItem("theme", next ? "dark" : "light");
-    } catch {}
+    const root = document.documentElement;
+    root.classList.toggle("dark", next);
+    root.classList.toggle("light", !next);
+    document.cookie = `theme=${next ? "dark" : "light"}; path=/; max-age=31536000; samesite=lax`;
   }
 
   return (
