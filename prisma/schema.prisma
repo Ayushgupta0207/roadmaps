@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ResourceType {
+  VIDEO
+  DOC
+  BOOK
+  COURSE
+  ARTICLE
+}
+
+enum Level {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model Roadmap {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String
+  nodes       Node[]
+  createdAt   DateTime @default(now())
+}
+
+model Node {
+  id        String     @id @default(cuid())
+  roadmapId String
+  roadmap   Roadmap    @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
+  slug      String
+  title     String
+  summary   String
+  posX      Float
+  posY      Float
+  parentId  String?
+  parent    Node?      @relation("Tree", fields: [parentId], references: [id])
+  children  Node[]     @relation("Tree")
+  resources Resource[]
+
+  @@unique([roadmapId, slug])
+  @@index([roadmapId])
+}
+
+model Resource {
+  id            String       @id @default(cuid())
+  nodeId        String
+  node          Node         @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  title         String
+  url           String
+  type          ResourceType
+  level         Level
+  isFree        Boolean      @default(true)
+  reason        String
+  score         Int          @default(0)
+  isBroken      Boolean      @default(false)
+  lastCheckedAt DateTime?
+
+  @@index([nodeId])
+}
