@@ -1,28 +1,49 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #ffffff;
+  --fg: #0a0a0a;
+  --muted: #6b7280;
+  --card: #f9fafb;
+  --border: #e5e7eb;
+  --accent: #4f46e5;
+}
+
+.dark {
+  --bg: #0a0a0a;
+  --fg: #fafafa;
+  --muted: #a3a3a3;
+  --card: #171717;
+  --border: #2e2e2e;
+  --accent: #818cf8;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-  display: flex;
-  place-items: center;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* Make the graph follow the same tokens */
+html .react-flow.react-flow {
+  --xy-background-color-default: var(--bg);
+  --xy-background-pattern-dot-color-default: var(--border);
+  --xy-node-background-color-default: var(--card);
+  --xy-node-color-default: var(--fg);
+  --xy-node-border-default: 1px solid var(--border);
+  --xy-edge-stroke-default: var(--muted);
+  --xy-controls-button-background-color-default: var(--card);
+  --xy-controls-button-color-default: var(--fg);
+  --xy-controls-button-border-color-default: var(--border);
 }

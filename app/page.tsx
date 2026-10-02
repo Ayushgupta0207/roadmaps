@@ -15,13 +15,16 @@ export default async function Home() {
         {roadmaps.map((r) => (
           <li key={r.id}>
             <Link href={`/roadmaps/${r.slug}`}
-              className="block rounded-xl border p-5 hover:shadow-md">
+              className="block rounded-xl border border-border bg-card p-5 transition hover:border-accent hover:shadow-md">
               <h2 className="text-xl font-semibold">{r.title}</h2>
               <p className="text-sm text-neutral-600">{r.description}</p>
             </Link>
           </li>
         ))}
       </ul>
+      {roadmaps.length === 0 && (
+        <p className="mt-8 text-muted">No roadmaps yet. Check back soon.</p>
+      )}
     </main>
   );
 }
