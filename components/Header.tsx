@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { auth, signIn, signOut } from "@/auth";
 import ThemeToggle from "./ThemeToggle";
+import { isAdmin } from "@/lib/admin";
 
 const btn = "rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-card";
 
 export default async function Header() {
   const session = await auth();
+    const admin = await isAdmin();
 
   return (
     <header className="border-b border-border">
@@ -13,6 +15,7 @@ export default async function Header() {
         <Link href="/" className="font-bold">LearnMap</Link>
 
         <div className="flex items-center gap-2">
+          {admin && <Link href="/admin" className={btn}>Admin</Link>}
           <ThemeToggle />
           {session?.user ? (
             <form
